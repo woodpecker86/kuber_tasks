@@ -42,7 +42,7 @@ _=/usr/bin/printenv
 kubectl apply -f nginx-configmap.yaml
 kubectl apply -f deployment.yaml
 ```
-### Получим IP адрес пода
+### Get pod ip address
 ```bash
 kubectl get pods -o wide
 NAME                   READY   STATUS    RESTARTS   AGE     IP           NODE       NOMINATED NODE   READINESS GATES
@@ -51,9 +51,9 @@ web-5584c6c5c6-l4drg   1/1     Running   0          4m47s   172.17.0.10   miniku
 web-5584c6c5c6-xn466   1/1     Running   0          4m47s   172.17.0.9    minikube   <none>           <none>
 ```
 * Try connect to pod with curl (curl pod_ip_address). What happens?
-From you PC
-From minikube (minikube ssh)
-From another pod (kubectl exec -it $(kubectl get pod |awk '{print $1}'|grep web-|head -n1) bash)
+* From you PC
+* From minikube (minikube ssh)
+* From another pod (kubectl exec -it $(kubectl get pod |awk '{print $1}'|grep web-|head -n1) bash)
 ### Create service (ClusterIP)
 The command that can be used to create a manifest template
 ```bash
@@ -124,8 +124,8 @@ Create Ingress
 kubectl apply -f ingress.yaml
 curl $(minikube ip)
 ```
-** 
-В Minikube в namespace kube-system, запущено много разных подов. Ваша задача разобраться, кто их создает, и кто следит, чтобы они были запущенными (восстанавливает после удаления).
+### Homework
+* В Minikube в namespace kube-system, запущено много разных подов. Ваша задача разобраться, кто их создает, и кто следит, чтобы они были запущенными (восстанавливает после удаления).
 
-Реализовать Canary развертывание приложения через Ingress. Трафик на canary deployment должен перенаправляться если в заголовке добавить "canary:always" в ином случае он должен идти на обычный deployment.
+* Реализовать Canary развертывание приложения через Ingress. Трафик на canary deployment должен перенаправляться если в заголовке добавить "canary:always" в ином случае он должен идти на обычный deployment.
 Опционально можете настроить перенаправлять какой-то процент трафика на canary deployment.

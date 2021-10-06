@@ -135,4 +135,5 @@ kubectl get pod
 ```bash
 kubectl run web --image=nginx:latest --dry-run=client -o yaml
 ```
+### Homework
 * Create a deployment nginx. Set up two replicas. Remove one of the pods, see what happens.
