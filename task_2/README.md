@@ -1,4 +1,4 @@
-# Task 2.1
+# Task 2
 ### ConfigMap & Secrets
 ```bash
 kubectl create secret generic connection-string --from-literal=DATABASE_URL=postgres://connect --dry-run=client -o yaml > secret.yaml
