@@ -1,18 +1,43 @@
 # Task 2.1
 ### ConfigMap & Secrets
 ```bash
-kubectl create secret generic connection-string --from-literal=DATABASE_URL=postgres://connect --dry-run -o yaml > secret.yaml
-ubectl create configmap user --from-literal=firstname=firstname --from-literal=lastname=lastname --dry-run -o yaml > cm.yaml
+kubectl create secret generic connection-string --from-literal=DATABASE_URL=postgres://connect --dry-run=client -o yaml > secret.yaml
+kubectl create configmap user --from-literal=firstname=firstname --from-literal=lastname=lastname --dry-run=client -o yaml > cm.yaml
 kubectl apply -f secret.yaml
 kubectl apply -f cm.yaml
 kubectl apply -f pod.yaml
 ```
-## Проверка
+## Check env in pod
 ```bash
 kubectl exec -it nginx -- bash
 printenv
 ```
-### Создадим Deployment с простейшим приложением
+### Sample output (find our env)
+```bash
+Unable to use a TTY - input is not a terminal or the right kind of file
+printenv
+KUBERNETES_SERVICE_PORT_HTTPS=443
+KUBERNETES_SERVICE_PORT=443
+DATABASE_URL=postgres://connect
+HOSTNAME=nginx
+PWD=/
+PKG_RELEASE=1~buster
+HOME=/root
+KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+NJS_VERSION=0.6.2
+SHLVL=1
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+lastname=lastname
+KUBERNETES_SERVICE_HOST=10.96.0.1
+KUBERNETES_PORT=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP_PORT=443
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+firstname=firstname
+NGINX_VERSION=1.21.3
+_=/usr/bin/printenv
+```
+### Create deployment with simple application
 ```bash
 kubectl apply -f nginx-configmap.yaml
 kubectl apply -f deployment.yaml
@@ -21,69 +46,86 @@ kubectl apply -f deployment.yaml
 ```bash
 kubectl get pods -o wide
 NAME                   READY   STATUS    RESTARTS   AGE     IP           NODE       NOMINATED NODE   READINESS GATES
-web-7db5cc6459-lp6lp   1/1     Running   0          5m50s   172.17.0.6   minikube   <none>           <none>
-web-7db5cc6459-txkkq   1/1     Running   0          5m50s   172.17.0.8   minikube   <none>           <none>
-web-7db5cc6459-v9r7n   1/1     Running   0          5m50s   172.17.0.7   minikube   <none>           <none>
+web-5584c6c5c6-6wmdx   1/1     Running   0          4m47s   172.17.0.11   minikube   <none>           <none>
+web-5584c6c5c6-l4drg   1/1     Running   0          4m47s   172.17.0.10   minikube   <none>           <none>
+web-5584c6c5c6-xn466   1/1     Running   0          4m47s   172.17.0.9    minikube   <none>           <none>
 ```
-Попробуйте подключиться к POD по http (curl pod_ip_address)
-
-С вашего компьютера
-Из minikube (minikube ssh)
-Из другого pod (kubectl exec -it web-7db5cc6459-lp6lp bash)
-### Создадим service (ClusterIP)
-Команда с помощью которой можно создать заготовку манифеста
+* Try connect to pod with curl (curl pod_ip_address). What happens?
+From you PC
+From minikube (minikube ssh)
+From another pod (kubectl exec -it $(kubectl get pod |awk '{print $1}'|grep web-|head -n1) bash)
+### Create service (ClusterIP)
+The command that can be used to create a manifest template
 ```bash
-kubectl expose deployment/web --type=ClusterIP --dry-run -o yaml > service_template.yaml
+kubectl expose deployment/web --type=ClusterIP --dry-run=client -o yaml > service_template.yaml
 ```
-Применим манифест
+Apply manifest
 ```bash
-kubectl apply -f service.yaml
+kubectl apply -f service_template.yaml
 ```
-Получите CLUSTER-IP сервиса
+Get service CLUSTER-IP
 ```bash
 kubectl get svc
 ```
-Попробуйте подключиться к сервису по http (curl service_ip_address)
+### Sample output
+```bash
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP   20h
+web          ClusterIP   10.100.170.236   <none>        80/TCP    28s
+```
+* Try connect to service (curl service_ip_address). What happens?
 
-С вашего компьютера
-Из minikube (minikube ssh)
-Из другого pod (kubectl exec -it web-7db5cc6459-lp6lp bash)
+From you PC
+From minikube (minikube ssh) (run the command several times)
+From another pod (kubectl exec -it $(kubectl get pod |awk '{print $1}'|grep web-|head -n1) bash) (run the command several times)
 ### NodePort
 ```bash
 kubectl apply -f service-nodeport.yaml
 kubectl get service
 ```
-Обратите внимание как указан port для сервиса типа NodePort
-### Проверка доступности сервиса типа NodePort
+### Sample output
+```bash
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP        20h
+web          ClusterIP   10.100.170.236   <none>        80/TCP         15m
+web-np       NodePort    10.101.147.109   <none>        80:30682/TCP   8s
+```
+Note how port is specified for a NodePort service
+### Checking the availability of the NodePort service type
 ```bash
 minikube ip
 curl <minikube_ip>:<nodeport_port>
 ```
-### Headless сервис
+### Headless service
 ```bash
 kubectl apply -f service-headless.yaml
 ```
 ### DNS
-Подключитесь к любому поду
+Connect to any pod
 ```bash
 cat /etc/resolv.conf
 ```
-Сравните IP адрес DNS сервера в поде и DNS сервиса кластера Kubernetes.
-### Сравнение headless и обычного clusterip
-Внутри пода выполнить nslookup до обычного clusterip и headless. Сравните результат.
-потребуется установить пакет dnsutils
+Compare the IP address of the DNS server in the pod and the DNS service of the Kubernetes cluster.
+* Compare headless and clusterip
+Inside the pod run nslookup to normal clusterip and headless. Compare the results.
+You will need to create pod with dnsutils.
 ### [Ingress](https://kubernetes.github.io/ingress-nginx/deploy/#minikube)
-Включим Ingress контроллер
+Enable Ingress controller
 ```bash
 minikube addons enable ingress
 ```
-Посмотрим, что создает нам ingress контроллер
+Let's see what the ingress controller creates for us
 ```bash
-kubectl get pods -n kube-system # найдем под в имени которого есть nginx-controller
-kubectl get pod ingress-nginx-controller-dff6f7b7-8l7nt -n kube-system -o yaml # нужно заменить имя пода
+kubectl get pods -n ingress-nginx
+kubectl get pod $(kubectl get pod -n ingress-nginx|grep ingress-nginx-controller|awk '{print $1}') -n ingress-nginx -o yaml
 ```
-Создадим Ingress
+Create Ingress
 ```bash
 kubectl apply -f ingress.yaml
 curl $(minikube ip)
 ```
+** 
+В Minikube в namespace kube-system, запущено много разных подов. Ваша задача разобраться, кто их создает, и кто следит, чтобы они были запущенными (восстанавливает после удаления).
+
+Реализовать Canary развертывание приложения через Ingress. Трафик на canary deployment должен перенаправляться если в заголовке добавить "canary:always" в ином случае он должен идти на обычный deployment.
+Опционально можете настроить перенаправлять какой-то процент трафика на canary deployment.
