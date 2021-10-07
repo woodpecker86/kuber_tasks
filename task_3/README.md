@@ -50,7 +50,7 @@ kubectl get sts
 ```
 
 ### Homework
-* Мы публиковали minio "наружу" используя nodePort. Сделайте тоже самое но с использованием ingress.
-* Опубликовать minio через ingress так, чтобы одновременно был доступен minio по ip_minikube и nginx, возвращающий hostname (предыдущее задание) по пути ip_minikube/web.
-* Создать pv/pvc с emptyDir, создать соответствующий deployment, сохранить данные в mountPoint emptyDir, удалить поды, проверить данные.
-* Опционально. Поднять nfs шару на сторонней машине. Создать pv, использующий эту шару, создать для него pvc, создать деплоймент. Сохранить данные в шару, удалить деплоймент, удалить pv/pvc, проверить сохранность данных.
+* We published minio "outside" using nodePort. Do the same but using ingress.
+* Publish minio via ingress so that minio by ip_minikube and nginx returning hostname (previous job) by path ip_minikube/web are available at the same time.
+* Create pv/pvc with emptyDir, create appropriate deployment, save data to mountPoint emptyDir, delete pods, check data.
+* Optional. Raise an nfs share on a remote machine. Create a pv using this share, create a pvc for it, create a deployment. Save data to the share, delete the deployment, delete the pv/pvc, check that the data is safe.

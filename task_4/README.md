@@ -1,5 +1,5 @@
 # Task 5
-### Проверить что может делать юзер
+### Check what I can do
 ```bash
 kubectl auth can-i create deployments --namespace kube-system
 ```
@@ -7,18 +7,18 @@ kubectl auth can-i create deployments --namespace kube-system
 ```bash
 yes
 ```
-### Настроим атентификацию пользователей с испоьзованием x509 сертификатов
-### Создадим закрытый ключ
+### Configure user authentication using x509 certificates
+### Create private key
 ```bash
 openssl genrsa -out k8s_user.key 2048
 ```
-### Создадим запрос на подпись сертификата
+### Create a certificate signing request
 ```bash
 openssl req -new -key k8s_user.key \
 -out k8s_user.csr \
 -subj "/CN=k8s_user"
 ```
-### Подпишите CSR в Kubernetes CA. Мы должны использовать сертификат CA и ключ, которые обычно находятся в /etc/kubernetes/pki. Но т.к. мы используем minikube, то сертификаты будут лежать на хост машине в ~/.minikube
+### Sign the CSR in the Kubernetes CA. We have to use the CA certificate and the key, which are usually in /etc/kubernetes/pki. But since we use minikube, the certificates will be on the host machine in ~/.minikube
 ```bash
 openssl x509 -req -in k8s_user.csr \
 -CA ~/.minikube/ca.crt \
@@ -26,20 +26,20 @@ openssl x509 -req -in k8s_user.csr \
 -CAcreateserial \
 -out k8s_user.crt -days 500
 ```
-### Создадим пользователя внутри kubernetes
+### Create user in kubernetes
 ```bash
 kubectl config set-credentials k8s_user \
 --client-certificate=k8s_user.crt \
 --client-key=k8s_user.key
 ```
-### Зададим контекст для пользователя
+### Set context for user
 ```bash
 kubectl config set-context k8s_user \
 --cluster=kubernetes --user=k8s_user
 ```
-### Далее необходимо отредактировать файл ~/.kube/config
+### Edit ~/.kube/config
 ```bash
-Заменить пути на корректные
+Change path
 - name: k8s_user
   user:
     client-certificate: C:\Users\Andrey_Trusikhin\educ\k8s_user.crt
@@ -51,35 +51,35 @@ contexts:
     user: k8s_user
   name: k8s_user
 ```
-### Переключимся на использование нового контекста
+### Switch to use new context
 ```bash
 kubectl config use-context k8s_user
 ```
-### Проверим доступы
+### Check privileges
 ```bash
 kubectl get node
 kubectl get pod
 ```
-### Примерный вывод
+### Sample output
 ```bash
 Error from server (Forbidden): pods is forbidden: User "k8s_user" cannot list resource "pods" in API group "" in the namespace "default"
 ```
-### Переключимся в админский контекст
+### Switch to default(admin) context
 ```bash
 kubectl config use-context minikube
 ```
-### Привяжем role и clusterrole к пользователю
+### Bind role and clusterrole to the user
 ```bash
 kubectl apply -f binding.yaml
 ```
-### Проверим вывод команды
+### Check output
 ```bash
 kubectl get pod
 ```
-Должны увидеть доступные поды
+Now we can see pods
 
 
 ### Homework
-* Создать пользователя deploy_view и deploy_edit. Пользователю deploy_view выдать права только на просмотр деплоев, подов. Пользователю deploy_edit выдать полные права на объекты deployments, pods.
-* Создать namespace prod. Создать пользователей prod_admin, prod_view. Пользователю prod_admin выдать админские права на нс prod, пользователю prod_view выдать только view права на prod.
-* Создать serviceAccount sa-namespace-admin. Выдать полные права на namespace default. Создать контекст, авторизоваться используя созданный sa, проверить доступы.
+* Create users deploy_view and deploy_edit. Give the user deploy_view rights only to view deployments, pods. Give the user deploy_edit full rights to the objects deployments, pods.
+* Create namespace prod. Create users prod_admin, prod_view. Give the user prod_admin admin rights on ns prod, give the user prod_view only view rights on namespace prod.
+* Create a serviceAccount sa-namespace-admin. Grant full rights to namespace default. Create context, authorize using the created sa, check accesses.

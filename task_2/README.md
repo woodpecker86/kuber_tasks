@@ -125,7 +125,7 @@ kubectl apply -f ingress.yaml
 curl $(minikube ip)
 ```
 ### Homework
-* В Minikube в namespace kube-system, запущено много разных подов. Ваша задача разобраться, кто их создает, и кто следит, чтобы они были запущенными (восстанавливает после удаления).
+* In Minikube in namespace kube-system, there are many different pods running. Your task is to figure out who creates them, and who makes sure they are running (restores them after deletion).
 
-* Реализовать Canary развертывание приложения через Ingress. Трафик на canary deployment должен перенаправляться если в заголовке добавить "canary:always" в ином случае он должен идти на обычный deployment.
-Опционально можете настроить перенаправлять какой-то процент трафика на canary deployment.
+* Implement Canary deployment of an application via Ingress. Traffic to canary deployment should be redirected if you add "canary:always" in the header, otherwise it should go to regular deployment.
+Optionally you can set to redirect a percentage of traffic to canary deployment.
