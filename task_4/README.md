@@ -1,5 +1,5 @@
 # Task 5
-### Check what I can do
+### Проверить что может делать юзер
 ```bash
 kubectl auth can-i create deployments --namespace kube-system
 ```
@@ -7,7 +7,7 @@ kubectl auth can-i create deployments --namespace kube-system
 ```bash
 yes
 ```
-# Настроим атентификацию пользователей с испоьзованием x509 сертификатов
+### Настроим атентификацию пользователей с испоьзованием x509 сертификатов
 ### Создадим закрытый ключ
 ```bash
 openssl genrsa -out k8s_user.key 2048
