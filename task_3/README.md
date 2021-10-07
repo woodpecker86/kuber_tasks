@@ -1,4 +1,5 @@
 # Task 3
+### [Read more about CSI](https://habr.com/ru/company/flant/blog/424211/)
 ### Create pv in kubernetes
 ```bash
 kubectl apply -f pv.yaml
@@ -42,7 +43,7 @@ Open minikup_ip:node_port in you browser
 ```bash
 kubectl apply -f statefulset.yaml
 ```
-### Ceck pod and statefulset
+### Check pod and statefulset
 ```bash
 kubectl get pod
 kubectl get sts
