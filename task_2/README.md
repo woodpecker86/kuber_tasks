@@ -75,9 +75,9 @@ web          ClusterIP   10.100.170.236   <none>        80/TCP    28s
 ```
 * Try connect to service (curl service_ip_address). What happens?
 
-From you PC
-From minikube (minikube ssh) (run the command several times)
-From another pod (kubectl exec -it $(kubectl get pod |awk '{print $1}'|grep web-|head -n1) bash) (run the command several times)
+* From you PC
+* From minikube (minikube ssh) (run the command several times)
+* From another pod (kubectl exec -it $(kubectl get pod |awk '{print $1}'|grep web-|head -n1) bash) (run the command several times)
 ### NodePort
 ```bash
 kubectl apply -f service-nodeport.yaml
