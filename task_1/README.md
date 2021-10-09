@@ -45,7 +45,6 @@ minikube   Ready    control-plane,master   9m52s   v1.22.2
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
 ```
-# [More about kubernetes-dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
 # Check kubernetes-dashboard ns
 ```bash
  kubectl get pod -n kubernetes-dashboard
