@@ -44,7 +44,6 @@ Change path
   user:
     client-certificate: C:\Users\Andrey_Trusikhin\educ\k8s_user.crt
     client-key: C:\Users\Andrey_Trusikhin\educ\k8s_user.key
-Добавить в 
 contexts:
 - context:
     cluster: minikube
