@@ -105,7 +105,7 @@ kubectl proxy
 In browser connect to http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
 
 # Task 1.2
-# Kubernetes resourceas introduction
+# Kubernetes resources introduction
 ```bash
 kubectl run web --image=nginx:latest
 ```
