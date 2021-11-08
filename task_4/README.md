@@ -35,7 +35,7 @@ kubectl config set-credentials k8s_user \
 ### Set context for user
 ```bash
 kubectl config set-context k8s_user \
---cluster=kubernetes --user=k8s_user
+--cluster=minikube --user=k8s_user
 ```
 ### Edit ~/.kube/config
 ```bash
