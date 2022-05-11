@@ -136,3 +136,38 @@ kubectl run web --image=nginx:latest --dry-run=client -o yaml
 ```
 ### Homework
 * Create a deployment nginx. Set up two replicas. Remove one of the pods, see what happens.
+
+### That's what I've made
+Created a deployment manifest from cmd
+```bash
+$ kubectl create deploy nginx --image=nginx:latest --dry-run=client -o yaml > nginx-deployment.yaml
+```
+Changed 'replicas: 2' in the 'nginx-deployment.yaml' and applied it
+```bash
+$ kubectl apply -f nginx-deployment.yaml
+
+$ kubectl get deploy
+NAME    READY   UP-TO-DATE   AVAILABLE   AGE
+nginx   2/2     2            2           2m14s
+
+$ kubectl get po
+NAME                     READY   STATUS    RESTARTS        AGE
+dnsutils                 1/1     Running   1 (4m45s ago)   2d22h
+nginx-7c658794b9-6r859   1/1     Running   0               32s
+nginx-7c658794b9-dm76q   1/1     Running   0               32s
+```
+Deleted one container and when new container was created
+```bash
+$ kubectl delete po nginx-7c658794b9-6r859
+pod "nginx-7c658794b9-6r859" deleted
+$ kubectl get po
+NAME                     READY   STATUS              RESTARTS        AGE
+dnsutils                 1/1     Running             1 (7m59s ago)   2d22h
+nginx-7c658794b9-6tdnp   0/1     ContainerCreating   0               4s
+nginx-7c658794b9-dm76q   1/1     Running             0               3m46s
+$ kubectl get po
+NAME                     READY   STATUS    RESTARTS        AGE
+dnsutils                 1/1     Running   1 (8m43s ago)   2d22h
+nginx-7c658794b9-6tdnp   1/1     Running   0               48s
+nginx-7c658794b9-dm76q   1/1     Running   0               4m30s
+```
