@@ -129,3 +129,143 @@ curl $(minikube ip)
 
 * Implement Canary deployment of an application via Ingress. Traffic to canary deployment should be redirected if you add "canary:always" in the header, otherwise it should go to regular deployment.
 Set to redirect a percentage of traffic to canary deployment.
+
+### That's what I've made
+
+The first part
+```bash
+$ for i in $(kubectl get po -n kube-system --output=jsonpath={.items..metadata.name}); do echo "Pod name: $i";  kubectl describe po -n kube-system $i|grep -i 'controlled by'; done
+Pod name: coredns-64897985d-v92xg
+Controlled By:  ReplicaSet/coredns-64897985d
+Pod name: etcd-minikube
+Controlled By:  Node/minikube
+Pod name: kube-apiserver-minikube
+Controlled By:  Node/minikube
+Pod name: kube-controller-manager-minikube
+Controlled By:  Node/minikube
+Pod name: kube-proxy-jgnzh
+Controlled By:  DaemonSet/kube-proxy
+Pod name: kube-scheduler-minikube
+Controlled By:  Node/minikube
+Pod name: metrics-server-6cd5c97f5d-lhqpz
+Controlled By:  ReplicaSet/metrics-server-6cd5c97f5d
+Pod name: metrics-server-847dcc659d-8l48j
+Controlled By:  ReplicaSet/metrics-server-847dcc659d
+Pod name: storage-provisioner
+```
+
+The second part
+Created 2 namespaces - "production" and "canary-env" and configmaps in them.
+```bash
+$ kubectl get configmap -A|grep nginx-configmap
+canary-env             nginx-configmap                      1      17h
+production             nginx-configmap                      1      17h
+```
+
+Applied deployment in namespaces
+```bash
+$ kubectl apply -f nginx-deployment.yaml -n production
+$ kubectl apply -f nginx-deployment.yaml -n canary-env
+```
+
+Result
+```bash
+$ kubectl get deploy -A|grep web
+canary-env             web                         2/2     2            2           18h
+production             web                         2/2     2            2           18h
+```
+
+Applied services in namespaces
+```bash
+$ kubectl apply -f service_template.yaml -n production
+$ kubectl apply -f service_template.yaml -n canary-env
+```
+
+Result
+```bash
+$ kubectl get service -A| grep web
+canary-env             web                                  ClusterIP   10.106.230.183   <none>        80/TCP                       74m
+production             web                                  ClusterIP   10.101.191.218   <none>        80/TCP                       75m
+```
+
+Applied ingresses in namespaces
+```bash
+$ kubectl apply -f ingress.yaml -n production
+$ kubectl apply -f ingress-canary-weight.yaml -n canary-env
+```
+
+Result
+```bash
+$ kubectl get ingress -A
+NAMESPACE    NAME                 CLASS    HOSTS   ADDRESS        PORTS   AGE
+canary-env   ingress-web-weight   <none>   *       192.168.49.2   80      10m
+production   ingress-web          <none>   *       192.168.49.2   80      17h
+```
+
+Work of ingress
+```bash
+$ for i in {1..10}; do curl -s -H "canary:never" $(minikube ip); done
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-fpxmf
+```
+
+```bash
+$ for i in {1..10}; do curl -s -H "canary:always" $(minikube ip); done
+web-6745ffd5c8-nsjrr
+I am canary deploy
+web-6745ffd5c8-vpskk
+I am canary deploy
+web-6745ffd5c8-vpskk
+I am canary deploy
+web-6745ffd5c8-nsjrr
+I am canary deploy
+web-6745ffd5c8-vpskk
+I am canary deploy
+web-6745ffd5c8-nsjrr
+I am canary deploy
+web-6745ffd5c8-vpskk
+I am canary deploy
+web-6745ffd5c8-nsjrr
+I am canary deploy
+web-6745ffd5c8-vpskk
+I am canary deploy
+web-6745ffd5c8-vpskk
+I am canary deploy
+```
+
+```bash
+$ for i in {1..20}; do curl $(minikube ip); done
+web-6745ffd5c8-vpskk
+I am canary deploy
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-nsjrr
+I am canary deploy
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-nsjrr
+I am canary deploy
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-fpxmf
+web-6745ffd5c8-r6pfh
+web-6745ffd5c8-nsjrr
+I am canary deploy
+web-6745ffd5c8-vpskk
+I am canary deploy
+web-6745ffd5c8-fpxmf
+```
