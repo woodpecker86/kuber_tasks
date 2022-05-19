@@ -154,7 +154,8 @@ Controlled By:  ReplicaSet/metrics-server-847dcc659d
 Pod name: storage-provisioner
 ```
 
-The second part
+The second part.
+
 Created 2 namespaces - "production" and "canary-env" and configmaps in them.
 ```bash
 $ kubectl get configmap -A|grep nginx-configmap
